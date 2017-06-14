@@ -8,6 +8,7 @@ from django.db.models.signals import pre_save
 from django.test.testcases import TestCase
 
 from tastypie import fields
+from tastypie.bundle import Bundle
 from tastypie.exceptions import ApiFieldError, NotFound
 
 from core.models import Note, MediaBit
@@ -34,7 +35,7 @@ class M2MResourcesTestCase(TestCaseWithFixture):
         ur = UserResource()
         fr = ForumResource()
 
-        resp = self.client.post(fr.get_resource_uri(), content_type='application/json', data=json.dumps({
+        resp = self.client.post(fr.get_resource_uri(url_name='api_dispatch_list'), content_type='application/json', data=json.dumps({
             'name': 'Test Forum',
             'members': [ur.get_resource_uri(user)],
             'moderators': [ur.get_resource_uri(user)],

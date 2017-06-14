@@ -799,22 +799,13 @@ class Resource(six.with_metaclass(DeclarativeMetaclass)):
 
         return kwargs
 
-    def get_resource_uri(self, bundle_or_obj=None, url_name='api_dispatch_list'):
+    def get_resource_uri(self, bundle_or_obj=None, url_name='api_dispatch_detail'):
         """
         Handles generating a resource URI.
-
-        If the ``bundle_or_obj`` argument is not provided, it builds the URI
-        for the list endpoint.
-
-        If the ``bundle_or_obj`` argument is provided, it builds the URI for
-        the detail endpoint.
 
         Return the generated URI. If that URI can not be reversed (not found
         in the URLconf), it will return an empty string.
         """
-        if bundle_or_obj is not None:
-            url_name = 'api_dispatch_detail'
-
         try:
             return self._build_reverse_url(url_name, kwargs=self.resource_uri_kwargs(bundle_or_obj))
         except NoReverseMatch:
@@ -1331,7 +1322,10 @@ class Resource(six.with_metaclass(DeclarativeMetaclass)):
         objects = self.obj_get_list(bundle=base_bundle, **self.remove_api_resource_names(kwargs))
         sorted_objects = self.apply_sorting(objects, options=request.GET)
 
-        paginator = self._meta.paginator_class(request.GET, sorted_objects, resource_uri=self.get_resource_uri(), limit=self._meta.limit, max_limit=self._meta.max_limit, collection_name=self._meta.collection_name)
+        paginator = self._meta.paginator_class(
+            request.GET, sorted_objects, resource_uri=self.get_resource_uri(base_bundle, "api_dispatch_list"),
+            limit=self._meta.limit, max_limit=self._meta.max_limit, collection_name=self._meta.collection_name
+        )
         to_be_serialized = paginator.page()
 
         # Dehydrate the bundles in preparation for serialization.
